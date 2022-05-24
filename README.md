@@ -9,14 +9,14 @@ The scripts and commands in this guide were executed on an Amazon Linux 2 jumpbo
 
 To also install the [Application Service Adapter for VMware Tanzu Application Platform public beta](https://tanzu.vmware.com/content/blog/application-service-adapter-for-vmware-tanzu-application-platform-2), you can follow the instructions [here](tas-adapter) after the installation of TAP.
 
-## Resources
+### Resources
  - [1.1 documentation](https://docs.vmware.com/en/Tanzu-Application-Platform/1.1/tap/GUID-overview.html)
 
-## Prerequisites 
+### Prerequisites 
 - [Pivnet CLI](https://github.com/pivotal-cf/pivnet-cli#installing)
-- A domain (configured in Route53)
+- A domain (configured in Route53 - Route53 need is relevant to lets encrypt cert management and external-dns )
 
-### local software
+##### local software
 - yq version 4
 
 
@@ -102,8 +102,8 @@ kubectl create clusterrolebinding tap-psp-rolebinding --group=system:authenticat
 ### Redhat Openshift on AWS (ROSA) 
 [see instructions in openshift folder](openshift/A_create_cluster.md)
 
-### instructions specific for openshift
-### create Security Context Constraints allowing specific runAsId's and permissions used by TAP  
+### security Context Constraings specific for openshift only
+##### create Security Context Constraints allowing specific runAsId's and permissions used by TAP  
 `kubectl apply -f openshift/scc-1.1.0`
 
 ## Prepare values.yaml ( if you haven't already )
@@ -162,7 +162,7 @@ rm -rf ~/Library/Application\ Support/tanzu-cli/*
 rm -rf ~/.local/share/tanzu-cli/*
 ```
 
-#### on openshift, this is required until PR merged into branch
+#### on openshift, this is required until PR to add finalizers to RBAC merged into branch
 `kubectl apply -f openshift/kapp-controller-cluster-role-2.yaml`
 
 ## Option 1 - Install TAP View profile only
@@ -182,10 +182,10 @@ Run the installation script.
 `kubectl get svc -n tanzu-system-ingress`
 
 ## validate httpproxy records 
-### important if you are using ClusterIP and httpproxy, letsencrypt certs and https protocol for ingress] 
+##### important if you are using ClusterIP and httpproxy, letsencrypt certs and https protocol for ingress] 
 kubectl get httpproxy -A
 
-### Tips
+## Tips
 - You can update installation on updates in your values.yaml via 
     ```
     ytt -f tap-values.yaml -f values.yaml --ignore-unknown-comments > generated/tap-values.yaml
@@ -205,7 +205,7 @@ kubectl get httpproxy -A
    }
    reconcile-packageinstall <package-installation-name>
    ```
-## Create additional developer namespace
+## Create [additional] developer namespace
 Currently there is no way to support multiple developer namespaces with the profile installation for the OOTB Supply Chain with Testing and Scanning.
 The reason for that is that Custom Resources(CR) required for scanning (Grype) are, at this point, namespace-scoped instead of cluster-scoped. 
 
