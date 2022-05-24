@@ -1,0 +1,27 @@
+---
+# candidate role and binding needed to deploy TAS adapter on TAP
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: eirini-controller-cluster-role-2
+rules:
+  - apiGroups:
+      - eirini.cloudfoundry.org
+    resources:
+      - lrps/finalizers
+    verbs:
+      - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+# This role binding grants "eirini-controller-sa" membership to ClusterRole eirini-controller-cluster-role-2
+kind: ClusterRoleBinding
+metadata:
+  name: eirini-controller-cluster-role-binding-2
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: eirini-controller-cluster-role-2
+subjects:
+  - kind: ServiceAccount
+    name: eirini-controller-sa
+    namespace: einrini-controller
