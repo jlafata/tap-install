@@ -1,0 +1,28 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kapp-controller-cluster-role-2
+rules:
+  - apiGroups:
+      - packaging.carvel.dev
+    resources:
+      - packageinstalls
+      - packageinstalls/status
+      - packageinstalls/finalizers
+    verbs:
+      - '*'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+# This role binding grants "kapp-controller-sa" membership to ClusterRole kapp-controller-cluster-role-2
+kind: ClusterRoleBinding
+metadata:
+  name: kapp-controller-cluster-role-binding-2
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kapp-controller-cluster-role-2
+subjects:
+  - kind: ServiceAccount
+    name: kapp-controller-sa
+    namespace: kapp-controller

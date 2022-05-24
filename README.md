@@ -16,6 +16,10 @@ To also install the [Application Service Adapter for VMware Tanzu Application Pl
 - [Pivnet CLI](https://github.com/pivotal-cf/pivnet-cli#installing)
 - A domain (configured in Route53)
 
+### local software
+- yq version 4
+
+
 ## Provision a Kubernetes cluster
 
 The scripts are currently only validated with GKE and AWS EKS, and Azure AKS!
@@ -95,7 +99,14 @@ az aks get-credentials --resource-group ${CLUSTER_NAME} --name ${CLUSTER_NAME}
 kubectl create clusterrolebinding tap-psp-rolebinding --group=system:authenticated --clusterrole=psp:privileged
 ```
 
-## Prepare values.yaml
+### Redhat Openshift on AWS (ROSA) 
+[see instructions in openshift folder](openshift/A_create_cluster.md)
+
+### instructions specific for openshift
+### create Security Context Constraints allowing specific runAsId's and permissions used by TAP  
+`kubectl apply -f openshift/scc-1.1.0`
+
+## Prepare values.yaml ( if you haven't already )
 Copy values-example.yaml to values.yaml and set configuration values
 ```
 cp values-example.yaml values.yaml
@@ -150,13 +161,29 @@ rm -rf ~/Library/Application\ Support/tanzu-cli/*
 ## Remove plugins on Linux
 rm -rf ~/.local/share/tanzu-cli/*
 ```
-## Install TAP Full profile
+
+#### on openshift, this is required until PR merged into branch
+`kubectl apply -f openshift/kapp-controller-cluster-role-2.yaml`
+
+## Option 1 - Install TAP View profile only
+```
+./view-profile-install.sh
+```
+
+## Option 2 - Install TAP Full profile
 [Documentation](https://docs.vmware.com/en/Tanzu-Application-Platform/1.0/tap/GUID-install.html)
 
 Run the installation script.
 ```
-./install.sh
+./install-tap-only.sh
 ```
+
+## Set DNS records for tap-gui.<ingress-domain> as appropriate for your install
+`kubectl get svc -n tanzu-system-ingress`
+
+## validate httpproxy records 
+### important if you are using ClusterIP and httpproxy, letsencrypt certs and https protocol for ingress] 
+kubectl get httpproxy -A
 
 ### Tips
 - You can update installation on updates in your values.yaml via 

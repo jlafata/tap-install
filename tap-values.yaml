@@ -11,14 +11,14 @@ buildservice:
   enable_automatic_dependency_updates: true
   descriptor_name: full
 
-supply_chain: testing_scanning
+#supply_chain: testing_scanning
 
-ootb_supply_chain_testing_scanning:
-  registry:
-    server: #@ data.values.container_registry.hostname
-    repository: #@ data.values.container_registry.project_workload
-  gitops:
-    ssh_secret: ""
+#ootb_supply_chain_testing_scanning:
+#  registry:
+#    server: #@ data.values.container_registry.hostname
+#    repository: #@ data.values.container_registry.project_workload
+#  gitops:
+#    ssh_secret: ""
 
 learningcenter:
   ingressDomain: #@ "learning-center.{}".format(data.values.ingress.domain)
@@ -30,7 +30,7 @@ tap_gui:
   ingressDomain: #@ data.values.ingress.domain
   service_type: ClusterIP # NodePort for distributions that don't support LoadBalancer
   tls:
-    secretName: #@ data.values.ingress.contour_tls_secret                                                 
+    secretName: #@ data.values.ingress.contour_tls_secret
     namespace: #@ data.values.ingress.contour_tls_namespace
   app_config:
     backend:
@@ -39,18 +39,22 @@ tap_gui:
         origin: #@ "https://tap-gui.{}".format(data.values.ingress.domain)
     app:
       baseUrl: #@ "https://tap-gui.{}".format(data.values.ingress.domain)
+    integrations:
+      github:
+        - host: #@ data.values.gitrepo.host
+          token: #@ data.values.gitrepo.token
     catalog:
       locations:
         - type: url
-          target: https://github.com/jlafata/git-catalog/blob/main/catalog-info.yaml
+          target: #@ data.values.catalog.location
 
-metadata_store:
-  app_service_type: ClusterIP # (optional) Defaults to LoadBalancer. Change to NodePort for distributions that don't support LoadBalancer
+#metadata_store:
+#  app_service_type: ClusterIP # (optional) Defaults to LoadBalancer. Change to NodePort for distributions that don't support LoadBalancer
 
 contour:
   envoy:
     service:
-      annotations:      
+      annotations:
         external-dns.alpha.kubernetes.io/hostname: #@ "*.{}".format(data.values.ingress.domain)
       type: LoadBalancer
 
@@ -59,7 +63,7 @@ accelerator:
   ingress:
     include: true
   tls:
-    secretName: #@ data.values.ingress.contour_tls_secret                                                 
+    secretName: #@ data.values.ingress.contour_tls_secret
     namespace: #@ data.values.ingress.contour_tls_namespace
   server:
     service_type: ClusterIP
@@ -69,7 +73,12 @@ cnrs:
   domain_template: "{{.Name}}-{{.Namespace}}.{{.Domain}}"
   default_tls_secret: #@ "{}/cnr-{}".format(data.values.ingress.contour_tls_namespace,data.values.ingress.contour_tls_secret)
 
-grype: 
-  namespace: #@ data.values.developer_namespace
-  targetImagePullSecret: registry-credentials
+#grype:
+#  namespace: #@ data.values.developer_namespace
+#  targetImagePullSecret: registry-credentials
 
+excluded_packages:
+  - ootb-supply-chain-basic.tanzu.vmware.com 
+  - scanning.apps.tanzu.vmware.com            
+  - grype.scanning.apps.tanzu.vmware.com
+  - metadata.store.apps.tanzu.vmware.com
