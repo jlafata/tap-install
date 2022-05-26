@@ -312,3 +312,19 @@ tanzu insight image get --digest $EXAMPLE_DIGEST --format json
 tanzu insight image packages --digest $EXAMPLE_DIGEST --format json
 tanzu insight image vulnerabilities --digest $EXAMPLE_DIGEST --format json
 ```
+
+
+## add identity provider to tap-gui
+Create a provider as described here:
+
+`https://backstage.io/docs/auth/github/provider`
+
+OIDC Auth provider with pinniped:
+
+`https://docs.google.com/document/d/1-q6Sphk_n5NC4k3ws6VMCCq8l2xDkUihY3jT2HuZeWM/edit?userstoinvite=bhale@vmware.com&actionButton=1#heading=h.yappl5s2rums`
+
+
+Update tap-values & values.yaml to use the name of your provider, in the example I am using os-sandbox
+reference:
+
+`https://docs.vmware.com/en/Tanzu-Application-Platform/1.1/tap/GUID-tap-gui-auth.html`
