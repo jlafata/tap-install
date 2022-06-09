@@ -11,6 +11,7 @@ generated_dir="${script_dir}/generated"
 mkdir -p "${generated_dir}"
 
 values_file_default="${script_dir}/values.yaml"
+#values_file_default="${script_dir}/values-aks.yaml"
 values_file=${VALUES_FILE:-$values_file_default}
 
 export INSTALL_REGISTRY_HOSTNAME=registry.tanzu.vmware.com
@@ -27,20 +28,18 @@ kapp deploy \
     ) \
   --yes
 
-# necessary when installing grype, otherwise can ignore
-#
-#DEVELOPER_NAMESPACE=$(yq '.developer_namespace' < "${values_file}")
-#
-#kapp deploy \
-#  --app "tap-dev-ns-${DEVELOPER_NAMESPACE}" \
-#  --namespace tap-install \
-#  --file <(\
-#    kubectl create namespace "${DEVELOPER_NAMESPACE}" \
-#      --dry-run=client \
-#      --output=yaml \
-#      --save-config \
-#    ) \
-#  --yes
+DEVELOPER_NAMESPACE=$(yq '.developer_namespace' < "${values_file}")
+
+kapp deploy \
+  --app "tap-dev-ns-${DEVELOPER_NAMESPACE}" \
+  --namespace tap-install \
+  --file <(\
+    kubectl create namespace "${DEVELOPER_NAMESPACE}" \
+      --dry-run=client \
+      --output=yaml \
+      --save-config \
+    ) \
+  --yes
 
 tanzu secret registry \
   --namespace tap-install \
@@ -112,7 +111,7 @@ kapp deploy \
   --app certificates \
   --namespace tap-install \
   --file <(\
-     ytt --ignore-unknown-comments -f values.yaml -f ${script_dir}/ingress-config/certificates \
+     ytt --ignore-unknown-comments -f values.yaml -f ${script_dir}/ingress-config/certificates-letsencrypt \
   ) \
   --yes
 
@@ -123,3 +122,6 @@ kapp deploy \
      ytt --ignore-unknown-comments -f values.yaml -f ${script_dir}/ingress-config/ingress \
   ) \
   --yes
+
+# configure initial developer namespace
+"${script_dir}/configure-dev-space.sh" "$DEVELOPER_NAMESPACE"

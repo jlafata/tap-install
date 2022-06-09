@@ -2,14 +2,6 @@
 ---
 profile: view
 ceip_policy_disclosed: true # Installation fails if this is set to 'false'
-buildservice:
-  kp_default_repository: #@ "{}/{}/build-service".format(data.values.container_registry.hostname,data.values.container_registry.project)
-  kp_default_repository_username: #@ data.values.container_registry.username
-  kp_default_repository_password: #@ data.values.container_registry.password
-  tanzunet_username: #@ data.values.tanzunet.username
-  tanzunet_password: #@ data.values.tanzunet.password
-  enable_automatic_dependency_updates: true
-  descriptor_name: view profile
 
 learningcenter:
   ingressDomain: #@ "learning-center.{}".format(data.values.ingress.domain)
@@ -33,13 +25,13 @@ tap_gui:
       locations:
         - type: url
           target: #@ data.values.catalog.location
-    auth:
-      environment: os-sandbox
-      providers:
-        github:
-          os-sandbox:
-            clientId: #@ data.values.tap.auth.client_id
-            clientSecret: #@ data.values.tap.auth.client_secret
+#    auth:
+#      environment: os-sandbox
+#      providers:
+#        github:
+#          os-sandbox:
+#            clientId: #@ data.values.tap.auth.client_id
+#            clientSecret: #@ data.values.tap.auth.client_secret
 
 metadata_store:
   app_service_type: ClusterIP # (optional) Defaults to LoadBalancer. Change to NodePort for distributions that don't support LoadBalancer
@@ -49,8 +41,21 @@ contour:
     service:
       type: LoadBalancer
 
+accelerator:
+#  domain: #@ "{}".format(data.values.ingress.domain)
+#  ingress:
+#    include: true
+#  tls:
+#    secretName: #@ data.values.ingress.contour_tls_secret
+#    namespace: #@ data.values.ingress.contour_tls_namespace
+#  server:
+#    service_type: ClusterIP
+  samples:
+    include: true
+
+
 excluded_packages:
   - ootb-supply-chain-basic.tanzu.vmware.com
   - scanning.apps.tanzu.vmware.com
   - grype.scanning.apps.tanzu.vmware.com
-  - metadata.store.apps.tanzu.vmware.com
+  - metadata-store.apps.tanzu.vmware.com

@@ -2,17 +2,25 @@
 a redhat account, an aws account (with Redhat openshift enabled), rosa and oc cli's installed locally
 
 ##### create cluster via rosa cli
-`export CLUSTER_NAME=test-cluster-1`
+```
+export CLUSTER_NAME=test-cluster-1
+```
 
-`./rosa create cluster --cluster-name $CLUSTER_NAME --sts --role-arn arn:aws:iam::806421138648:role/ManagedOpenShift-Installer-Role --support-role-arn arn:aws:iam::806421138648:role/ManagedOpenShift-Support-Role --controlplane-iam-role arn:aws:iam::806421138648:role/ManagedOpenShift-ControlPlane-Role --worker-iam-role arn:aws:iam::806421138648:role/ManagedOpenShift-Worker-Role --operator-roles-prefix $CLUSTER_NAME-g3g3 --region us-east-1 --version 4.10.9 --enable-autoscaling --min-replicas 2 --max-replicas 4 --compute-machine-type c5.2xlarge --machine-cidr 10.0.0.0/16 --service-cidr 172.30.0.0/16 --pod-cidr 10.128.0.0/14 --host-prefix 23 --disable-workload-monitoring`
+```
+../rosa create cluster --cluster-name $CLUSTER_NAME --sts --role-arn arn:aws:iam::806421138648:role/ManagedOpenShift-Installer-Role --support-role-arn arn:aws:iam::806421138648:role/ManagedOpenShift-Support-Role --controlplane-iam-role arn:aws:iam::806421138648:role/ManagedOpenShift-ControlPlane-Role --worker-iam-role arn:aws:iam::806421138648:role/ManagedOpenShift-Worker-Role --operator-roles-prefix $CLUSTER_NAME-g3g3 --region us-east-1 --version 4.10.9 --enable-autoscaling --min-replicas 2 --max-replicas 4 --compute-machine-type c5.2xlarge --machine-cidr 10.0.0.0/16 --service-cidr 172.30.0.0/16 --pod-cidr 10.128.0.0/14 --host-prefix 23 --disable-workload-monitoring
+```
 
-ID..    1sd8i5jpjr4uk4qd1s9scsv8bppmk805
-DNS..   test-cluster-1.moi4.p1.openshiftapps.com
+ID..    1sgjutkj2p7t2kbn5b8s40n823o4i87j
+DNS..   test-cluster-1.5tre.p1.openshiftapps.com
 
 
-`../rosa create operator-roles --cluster $CLUSTER_NAME  --mode auto --yes`
+```
+../rosa create operator-roles --cluster $CLUSTER_NAME  --mode auto --yes
+```
 
-`../rosa create oidc-provider --cluster test-cluster-1  --mode auto --yes`
+```
+../rosa create oidc-provider --cluster test-cluster-1  --mode auto --yes
+```
 
 ##### after the 3 create statements the cluster will move from waiting to installing state and eventuallly to ready state
 `../rosa list clusters`

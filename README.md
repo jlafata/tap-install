@@ -104,7 +104,13 @@ kubectl create clusterrolebinding tap-psp-rolebinding --group=system:authenticat
 
 ### security Context Constraings specific for openshift only
 ##### create Security Context Constraints allowing specific runAsId's and permissions used by TAP  
-`kubectl apply -f openshift/scc-1.1.0`
+```
+kubectl apply -f openshift/scc-1.1.0-core
+```
+#### if you are installing the full profile, also run this
+```
+kubectl apply -f openshift/scc-1.1.0-full
+```
 
 ## Prepare values.yaml ( if you haven't already )
 Copy values-example.yaml to values.yaml and set configuration values
@@ -163,9 +169,11 @@ rm -rf ~/.local/share/tanzu-cli/*
 ```
 
 #### on openshift, this is required until PR to add finalizers to RBAC merged into branch
-`kubectl apply -f openshift/kapp-controller-cluster-role-2.yaml`
+```
+kubectl apply -f openshift/kapp-controller-cluster-role-2.yaml
+```
 
-## Option 1 - Install TAP View profile only
+## Option 1 - Install TAP View profile only, the view profile currently assumes http protocol to the TAP-gui, it's the simplest install
 ```
 ./view-profile-install.sh
 ```
@@ -173,10 +181,21 @@ rm -rf ~/.local/share/tanzu-cli/*
 ## Option 2 - Install TAP Full profile
 [Documentation](https://docs.vmware.com/en/Tanzu-Application-Platform/1.0/tap/GUID-install.html)
 
-Run the installation script.
+Run one of the following installation scripts as appropriate for your cert requirements.
+I prefer to use the self-signed install in the first install, in case you need to iterate over the installation a few times
+the lets encrypt system has a rate limiter that causes the cert to not be generated if you run it > 5 times for the same domain key                                                                                                                      
 ```
-./install-tap-only.sh
+./full-profile-self-signed-install.sh
 ```
+or
+```
+./full-profile-letsencrypt-install.sh
+```
+or, though this one is currently untested, as of May 27, 2022
+```
+./full-profile-custom-ca-install.sh
+```
+
 
 ## Set DNS records for tap-gui.<ingress-domain> as appropriate for your install
 `kubectl get svc -n tanzu-system-ingress`
@@ -184,6 +203,12 @@ Run the installation script.
 ## validate httpproxy records 
 ##### important if you are using ClusterIP and httpproxy, letsencrypt certs and https protocol for ingress] 
 kubectl get httpproxy -A
+
+
+## if you installed the full profile, finish configuring the workload namespace 
+`./configure-dev-space.sh dev-space`
+
+
 
 ## Tips
 - You can update installation on updates in your values.yaml via 
@@ -213,6 +238,38 @@ This scripts helps you to create additional developer namespaces with everything
 ```
 ./create-additional-dev-space.sh <dev-ns>
 ```
+
+result
+```
+12:44:47PM:  ^ Reconciling
+12:44:51PM: fail: reconcile packageinstall/dev-space-grype (packaging.carvel.dev/v1alpha1) namespace: tap-install
+12:44:51PM:  ^ Reconcile failed:  (message: Error (see .status.usefulErrorMessage for details))
+
+kapp: Error: waiting on reconcile packageinstall/dev-space-grype (packaging.carvel.dev/v1alpha1) namespace: tap-install:
+  Finished unsuccessfully (Reconcile failed:  (message: Error (see .status.usefulErrorMessage for details)))
+```
+
+
+```
+kubectl describe packageinstall/dev-space-grype -n tap-install
+```
+```
+Status:
+  Conditions:
+    Message:               Error (see .status.usefulErrorMessage for details)
+    Status:                True
+    Type:                  ReconcileFailed
+  Friendly Description:    Reconcile failed: Error (see .status.usefulErrorMessage for details)
+  Last Attempted Version:  1.1.0
+  Observed Generation:     1
+  Useful Error Message:    kapp: Error: Ownership errors:
+- Resource 'scantemplate/private-image-scan-template (scanning.apps.tanzu.vmware.com/v1beta1) namespace: dev-space' is already associated with a different app 'grype-ctrl' namespace: tap-install (label 'kapp.k14s.io/app=1653842044992399855')
+- Resource 'scantemplate/blob-source-scan-template (scanning.apps.tanzu.vmware.com/v1beta1) namespace: dev-space' is already associated with a different app 'grype-ctrl' namespace: tap-install (label 'kapp.k14s.io/app=1653842044992399855')
+- Resource 'scantemplate/public-source-scan-template (scanning.apps.tanzu.vmware.com/v1beta1) namespace: dev-space' is already associated with a different app 'grype-ctrl' namespace: tap-install (label 'kapp.k14s.io/app=1653842044992399855')
+- Resource 'scantemplate/public-image-scan-template (scanning.apps.tanzu.vmware.com/v1beta1) namespace: dev-space' is already associated with a different app 'grype-ctrl' namespace: tap-install (label 'kapp.k14s.io/app=1653842044992399855')
+  Version:  1.1.0
+```
+
 The script will not create a Tekton CI pipeline or Scan Policy. See the [Usage](#usage) section on how to do this.
 
 *Hint: With the following command, you can check whether your developer namespace contains the required CRs for scanning.*

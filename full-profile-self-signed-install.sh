@@ -11,6 +11,7 @@ generated_dir="${script_dir}/generated"
 mkdir -p "${generated_dir}"
 
 values_file_default="${script_dir}/values.yaml"
+#values_file_default="${script_dir}/values-aks.yaml"
 values_file=${VALUES_FILE:-$values_file_default}
 
 export INSTALL_REGISTRY_HOSTNAME=registry.tanzu.vmware.com
@@ -102,7 +103,7 @@ kapp deploy \
   --app lets-encrypt-issuer \
   --namespace tap-install \
   --file <(\
-     ytt --ignore-unknown-comments -f values.yaml -f ${script_dir}/ingress-config/lets-encrypt-issuer \
+     ytt --ignore-unknown-comments -f values.yaml -f ${script_dir}/ingress-config/self-signed-issuer \
   ) \
   --yes
 
@@ -110,7 +111,7 @@ kapp deploy \
   --app certificates \
   --namespace tap-install \
   --file <(\
-     ytt --ignore-unknown-comments -f values.yaml -f ${script_dir}/ingress-config/certificates \
+     ytt --ignore-unknown-comments -f values.yaml -f ${script_dir}/ingress-config/certificates-self-signed \
   ) \
   --yes
 

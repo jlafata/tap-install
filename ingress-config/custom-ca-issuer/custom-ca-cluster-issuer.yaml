@@ -1,0 +1,20 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: custom-ca-contour-key-pair
+  namespace: cert-manager
+data:
+  tls.crt: #@
+  tls.key: #@ <cat crt.pem | base64 -b0>
+
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: custom-ca-contour-cluster-issuer
+spec:
+  ca:
+    secretName: custom-ca-contour-key-pair
+

@@ -14,6 +14,7 @@ fi
 script_dir="$(cd $(dirname "$BASH_SOURCE[0]") && pwd)"
 
 values_file_default="${script_dir}/values.yaml"
+#values_file_default="${script_dir}/values-aks.yaml"
 values_file=${VALUES_FILE:-$values_file_default}
 
 DEVELOPER_NAMESPACE=${1}

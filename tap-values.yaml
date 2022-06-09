@@ -11,14 +11,14 @@ buildservice:
   enable_automatic_dependency_updates: true
   descriptor_name: full
 
-#supply_chain: testing_scanning
+supply_chain: testing_scanning
 
-#ootb_supply_chain_testing_scanning:
-#  registry:
-#    server: #@ data.values.container_registry.hostname
-#    repository: #@ data.values.container_registry.project_workload
-#  gitops:
-#    ssh_secret: ""
+ootb_supply_chain_testing_scanning:
+  registry:
+    server: #@ data.values.container_registry.hostname
+    repository: #@ data.values.container_registry.project_workload
+  gitops:
+    ssh_secret: ""
 
 learningcenter:
   ingressDomain: #@ "learning-center.{}".format(data.values.ingress.domain)
@@ -47,9 +47,16 @@ tap_gui:
       locations:
         - type: url
           target: #@ data.values.catalog.location
+#    auth:
+#      environment: #@ data.values.tap.auth.oauthApp
+#      providers:
+#        github:
+#          #@: data.values.tap.auth.oauthApp
+#            clientId: #@ data.values.tap.auth.client_id
+#            clientSecret: #@ data.values.tap.auth.client_secret
 
-#metadata_store:
-#  app_service_type: ClusterIP # (optional) Defaults to LoadBalancer. Change to NodePort for distributions that don't support LoadBalancer
+metadata_store:
+  app_service_type: ClusterIP # (optional) Defaults to LoadBalancer. Change to NodePort for distributions that don't support LoadBalancer
 
 contour:
   envoy:
@@ -73,12 +80,12 @@ cnrs:
   domain_template: "{{.Name}}-{{.Namespace}}.{{.Domain}}"
   default_tls_secret: #@ "{}/cnr-{}".format(data.values.ingress.contour_tls_namespace,data.values.ingress.contour_tls_secret)
 
-#grype:
-#  namespace: #@ data.values.developer_namespace
-#  targetImagePullSecret: registry-credentials
+grype:
+  namespace: #@ data.values.developer_namespace
+  targetImagePullSecret: registry-credentials
 
-excluded_packages:
-  - ootb-supply-chain-basic.tanzu.vmware.com 
-  - scanning.apps.tanzu.vmware.com            
-  - grype.scanning.apps.tanzu.vmware.com
-  - metadata.store.apps.tanzu.vmware.com
+#excluded_packages:
+#  - ootb-supply-chain-basic.tanzu.vmware.com
+#  - scanning.apps.tanzu.vmware.com
+#  - grype.scanning.apps.tanzu.vmware.com
+#  - metadata.store.apps.tanzu.vmware.com
