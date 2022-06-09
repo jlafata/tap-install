@@ -1,1 +1,1 @@
-../oc login --server api.test-cluster-1.5tre.p1.openshiftapps.com:6443
+../oc login --server https://api.test-cluster-1.moi4.p1.openshiftapps.com:6443

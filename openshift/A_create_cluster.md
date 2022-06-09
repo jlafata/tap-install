@@ -9,10 +9,13 @@ export CLUSTER_NAME=test-cluster-1
 ```
 ../rosa create cluster --cluster-name $CLUSTER_NAME --sts --role-arn arn:aws:iam::806421138648:role/ManagedOpenShift-Installer-Role --support-role-arn arn:aws:iam::806421138648:role/ManagedOpenShift-Support-Role --controlplane-iam-role arn:aws:iam::806421138648:role/ManagedOpenShift-ControlPlane-Role --worker-iam-role arn:aws:iam::806421138648:role/ManagedOpenShift-Worker-Role --operator-roles-prefix $CLUSTER_NAME-g3g3 --region us-east-1 --version 4.10.9 --enable-autoscaling --min-replicas 2 --max-replicas 4 --compute-machine-type c5.2xlarge --machine-cidr 10.0.0.0/16 --service-cidr 172.30.0.0/16 --pod-cidr 10.128.0.0/14 --host-prefix 23 --disable-workload-monitoring
 ```
-
+results:
+``` 
+ ...
 ID..    1sgjutkj2p7t2kbn5b8s40n823o4i87j
 DNS..   test-cluster-1.5tre.p1.openshiftapps.com
-
+ ...
+```
 
 ```
 ../rosa create operator-roles --cluster $CLUSTER_NAME  --mode auto --yes
@@ -62,7 +65,6 @@ https://console.redhat.com/openshift/
 You must obtain an API token by visiting https://oauth-openshift.apps.test-cluster-1.fv6d.p1.openshiftapps.com/oauth/token/request
 ```
 ### get token and login with token
-![rh cluster console](doc-images/9_get_oc_login_token_via_github_authentication.png)
 ![rh cluster console](doc-images/9_get_oc_login_token_via_github_authentication.png)
 
 
