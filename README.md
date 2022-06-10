@@ -37,10 +37,11 @@ Follow these instructions to create a cluster
 [AKS Azure cluster creation](AKS/A_cluster_creation.md)
 
 ### Redhat Openshift on AWS (ROSA) 
-[see instructions in openshift folder](openshift/A_create_cluster.md)
+Follow these instructions to create a cluster
+[OpenShift cluster creation](openshift/A_create_cluster.md)
 
-### Security Context Constraints specific for openshift only
-##### Create Security Context Constraints allowing specific runAsId's and permissions used by TAP  
+##### Security Context Constraints specific for openshift only
+###### Create Security Context Constraints allowing specific runAsId's and permissions used by TAP  
 ```
 kubectl apply -f openshift/scc-1.1.0-core
 ```
