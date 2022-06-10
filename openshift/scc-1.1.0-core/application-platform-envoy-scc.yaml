@@ -1,22 +1,21 @@
 ---
 ###
-### security context constraints required to install the carvel secretgen-controller
-### * required until version v0.9.1 of carvel secretgen controller is released
+###  required for the daemonset envoy in the tanzu-system-ingress namespace
 ###
+###
+### this is based on the restrictive scc, but removes allowPrivilegeEscalation as this is not required?
+###
+
 kind: SecurityContextConstraints
 apiVersion: security.openshift.io/v1
 metadata:
-  name: cluster-essentials-secretgen-controller
+  name: application-platform-envoy-scc
 
 ###
-### values needed for the security context of the secretgen-controller
+### values needed for the security context of the kapp-controller
 ###
 
-runAsUser:
-  type: MustRunAs
-  uid: 1000
-fsGroup:
-  type: RunAsAny
+allowHostPorts: true
 
 ###
 ### required values in a security context controller
@@ -25,17 +24,18 @@ allowHostDirVolumePlugin: false
 allowHostIPC: false
 allowHostNetwork: false
 allowHostPID: false
-allowHostPorts: false
 allowPrivilegedContainer: false
 readOnlyRootFilesystem: false
 seLinuxContext:
   type: MustRunAs
+runAsUser:
+  type: MustRunAsRange
 
 ###
 ### make sure this is only used by the secretgen-controller-sa
 ###
 users:
-  - system:serviceaccount:secretgen-controller:secretgen-controller-sa
+  - system:serviceaccount:tanzu-system-ingress:envoy
 ---
 ###
 ### role for binding serviceaccount to constraint
@@ -46,13 +46,12 @@ users:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: cluster-essentials-secretgen-controller-role
-  namespace: secretgen-controller
+  name: application-platform-envoy-cluster-role
 rules:
   - apiGroups:
       - security.openshift.io
     resourceNames:
-      - cluster-essentials-secretgen-controller
+      - application-platform-envoy-scc
     resources:
       - securitycontextconstraints
     verbs:
@@ -65,13 +64,12 @@ apiVersion: rbac.authorization.k8s.io/v1
 # This role binding grants "secretgen-controller-sa" membership to Role cluster-essentials-secretgen-controller-role
 kind: RoleBinding
 metadata:
-  name: cluster-essentials-secretgen-controller-role-binding
-  namespace: secretgen-controller
+  name: application-platform-envoy-cluster-role-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: cluster-essentials-secretgen-controller-role
+  kind: ClusterRole
+  name: application-platform-envoy-cluster-role
 subjects:
   - kind: ServiceAccount
-    name: secretgen-controller-sa
-    namespace: secretgen-controller
+    namespace: tanzu-system-ingress
+    name: envoy

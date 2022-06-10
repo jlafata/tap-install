@@ -3,8 +3,8 @@
 profile: view
 ceip_policy_disclosed: true # Installation fails if this is set to 'false'
 
-learningcenter:
-  ingressDomain: #@ "learning-center.{}".format(data.values.ingress.domain)
+#learningcenter:
+#  ingressDomain: #@ "learning-center.{}".format(data.values.ingress.domain)
 
 tap_gui:
   ingressEnabled: true
@@ -33,8 +33,8 @@ tap_gui:
 #            clientId: #@ data.values.tap.auth.client_id
 #            clientSecret: #@ data.values.tap.auth.client_secret
 
-metadata_store:
-  app_service_type: ClusterIP # (optional) Defaults to LoadBalancer. Change to NodePort for distributions that don't support LoadBalancer
+#metadata_store:
+#  app_service_type: ClusterIP # (optional) Defaults to LoadBalancer. Change to NodePort for distributions that don't support LoadBalancer
 
 contour:
   envoy:
@@ -55,6 +55,8 @@ accelerator:
 
 
 excluded_packages:
+  - learningcenter.tanzu.vmware.com
+  - workshops.learningcenter.tanzu.vmware.com
   - ootb-supply-chain-basic.tanzu.vmware.com
   - scanning.apps.tanzu.vmware.com
   - grype.scanning.apps.tanzu.vmware.com

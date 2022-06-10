@@ -47,7 +47,6 @@ tanzu package repository \
 
 ytt -f "${script_dir}/view-profile-tap-values.yaml" -f "${values_file}" --ignore-unknown-comments > "${generated_dir}/tap-values.yaml"
 
-
 tanzu package install tap \
   --namespace tap-install \
   --package-name tap.tanzu.vmware.com \

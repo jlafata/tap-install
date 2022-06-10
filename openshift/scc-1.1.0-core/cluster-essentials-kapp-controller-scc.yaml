@@ -1,22 +1,26 @@
 ---
 ###
-### security context constraints required to install the carvel secretgen-controller
-### * required until version v0.9.1 of carvel secretgen controller is released
+### security context constraints required to install the carvel kapp-controller
+### * required until version v0.9.1 of carvel kapp controller is released
 ###
+### this is based on the restrictive scc, but removes allowPrivilegeEscalation as this is not required?
+###
+
 kind: SecurityContextConstraints
 apiVersion: security.openshift.io/v1
 metadata:
-  name: cluster-essentials-secretgen-controller
+  name: cluster-essentials-kapp-controller
 
 ###
-### values needed for the security context of the secretgen-controller
+### values needed for the security context of the kapp-controller
 ###
 
-runAsUser:
-  type: MustRunAs
-  uid: 1000
-fsGroup:
-  type: RunAsAny
+allowPrivilegeEscalation: false
+#capabilities:
+#  drop:
+#   - all
+readOnlyRootFilesystem: false
+#runAsNonRoot: true
 
 ###
 ### required values in a security context controller
@@ -30,12 +34,14 @@ allowPrivilegedContainer: false
 readOnlyRootFilesystem: false
 seLinuxContext:
   type: MustRunAs
+runAsUser:
+  type: MustRunAsRange
 
 ###
 ### make sure this is only used by the secretgen-controller-sa
 ###
 users:
-  - system:serviceaccount:secretgen-controller:secretgen-controller-sa
+  - system:serviceaccount:kapp-controller:kapp-controller-sa
 ---
 ###
 ### role for binding serviceaccount to constraint
@@ -46,13 +52,13 @@ users:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: cluster-essentials-secretgen-controller-role
-  namespace: secretgen-controller
+  name: cluster-essentials-kapp-controller-role
+  namespace: kapp-controller
 rules:
   - apiGroups:
       - security.openshift.io
     resourceNames:
-      - cluster-essentials-secretgen-controller
+      - cluster-essentials-kapp-controller
     resources:
       - securitycontextconstraints
     verbs:
@@ -65,13 +71,13 @@ apiVersion: rbac.authorization.k8s.io/v1
 # This role binding grants "secretgen-controller-sa" membership to Role cluster-essentials-secretgen-controller-role
 kind: RoleBinding
 metadata:
-  name: cluster-essentials-secretgen-controller-role-binding
-  namespace: secretgen-controller
+  name: cluster-essentials-kapp-controller-role-binding
+  namespace: kapp-controller
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: cluster-essentials-secretgen-controller-role
+  name: cluster-essentials-kapp-controller-role
 subjects:
   - kind: ServiceAccount
-    name: secretgen-controller-sa
-    namespace: secretgen-controller
+    name: kapp-controller-sa
+    namespace: kapp-controller

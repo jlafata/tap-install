@@ -1,22 +1,24 @@
 ---
 ###
-### security context constraints required to install the carvel secretgen-controller
-### * required until version v0.9.1 of carvel secretgen controller is released
 ###
+###
+###
+### this is based on the restrictive scc, but removes allowPrivilegeEscalation as this is not required?
+###
+
 kind: SecurityContextConstraints
 apiVersion: security.openshift.io/v1
 metadata:
-  name: cluster-essentials-secretgen-controller
+  name: application-platform-general-scc
 
 ###
-### values needed for the security context of the secretgen-controller
+### values needed for the security context of the kapp-controller
 ###
 
 runAsUser:
-  type: MustRunAs
-  uid: 1000
-fsGroup:
-  type: RunAsAny
+  type: MustRunAsRange
+  uidRangeMin: 65532
+  uidRangeMax: 65534
 
 ###
 ### required values in a security context controller
@@ -35,7 +37,7 @@ seLinuxContext:
 ### make sure this is only used by the secretgen-controller-sa
 ###
 users:
-  - system:serviceaccount:secretgen-controller:secretgen-controller-sa
+  - system:serviceaccount:tanzu-system-ingress:contour
 ---
 ###
 ### role for binding serviceaccount to constraint
@@ -44,15 +46,14 @@ users:
 ### https://docs.openshift.com/container-platform/4.6/authentication/managing-security-context-constraints.html#role-based-access-to-ssc_configuring-internal-oauth
 ###
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
-  name: cluster-essentials-secretgen-controller-role
-  namespace: secretgen-controller
+  name: application-platform-general-cluster-role
 rules:
   - apiGroups:
       - security.openshift.io
     resourceNames:
-      - cluster-essentials-secretgen-controller
+      - application-platform-general-scc
     resources:
       - securitycontextconstraints
     verbs:
@@ -63,15 +64,14 @@ rules:
 ###
 apiVersion: rbac.authorization.k8s.io/v1
 # This role binding grants "secretgen-controller-sa" membership to Role cluster-essentials-secretgen-controller-role
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
-  name: cluster-essentials-secretgen-controller-role-binding
-  namespace: secretgen-controller
+  name: application-platform-general-cluster-role-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: cluster-essentials-secretgen-controller-role
+  kind: ClusterRole
+  name: application-platform-general-cluster-role
 subjects:
   - kind: ServiceAccount
-    name: secretgen-controller-sa
-    namespace: secretgen-controller
+    namespace: tanzu-system-ingress
+    name: contour
