@@ -2,8 +2,7 @@
 ###
 ###  required for the daemonset envoy in the tanzu-system-ingress namespace
 ###
-###
-### this is based on the restrictive scc, but removes allowPrivilegeEscalation as this is not required?
+### this is based on the restrictive scc, but removes allowPrivilegeEscalation as this is not required
 ###
 
 kind: SecurityContextConstraints
@@ -12,7 +11,7 @@ metadata:
   name: application-platform-envoy-scc
 
 ###
-### values needed for the security context of the kapp-controller
+### values needed for the security context of the envoy daemon
 ###
 
 allowHostPorts: true
@@ -32,7 +31,7 @@ runAsUser:
   type: MustRunAsRange
 
 ###
-### make sure this is only used by the secretgen-controller-sa
+### make sure this is only used by the service account associated with the envoy daemon
 ###
 users:
   - system:serviceaccount:tanzu-system-ingress:envoy
@@ -61,7 +60,7 @@ rules:
 ### role binding for binding serviceaccount to constraint
 ###
 apiVersion: rbac.authorization.k8s.io/v1
-# This role binding grants "secretgen-controller-sa" membership to Role cluster-essentials-secretgen-controller-role
+# This role binding grants "envoy" service account membership to Role application-platform-envoy-cluster-role
 kind: RoleBinding
 metadata:
   name: application-platform-envoy-cluster-role-binding

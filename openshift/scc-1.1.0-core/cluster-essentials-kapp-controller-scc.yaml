@@ -19,8 +19,7 @@ allowPrivilegeEscalation: false
 #capabilities:
 #  drop:
 #   - all
-readOnlyRootFilesystem: false
-#runAsNonRoot: true
+
 
 ###
 ### required values in a security context controller
@@ -38,7 +37,7 @@ runAsUser:
   type: MustRunAsRange
 
 ###
-### make sure this is only used by the secretgen-controller-sa
+### make sure this is only used by the kapp-controller-sa in the tanzu-system-ingress namespace
 ###
 users:
   - system:serviceaccount:kapp-controller:kapp-controller-sa
@@ -68,7 +67,7 @@ rules:
 ### role binding for binding serviceaccount to constraint
 ###
 apiVersion: rbac.authorization.k8s.io/v1
-# This role binding grants "secretgen-controller-sa" membership to Role cluster-essentials-secretgen-controller-role
+# This role binding grants "kapp-controller-sa" membership to Role cluster-essentials-kapp-controller-role
 kind: RoleBinding
 metadata:
   name: cluster-essentials-kapp-controller-role-binding

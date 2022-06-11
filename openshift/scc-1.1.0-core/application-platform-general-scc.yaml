@@ -1,9 +1,8 @@
 ---
 ###
+### this scc is used by
 ###
 ###
-###
-### this is based on the restrictive scc, but removes allowPrivilegeEscalation as this is not required?
 ###
 
 kind: SecurityContextConstraints
@@ -12,7 +11,8 @@ metadata:
   name: application-platform-general-scc
 
 ###
-### values needed for the security context of the kapp-controller
+### values needed for the security context for a number application platform components
+### see users and role bindings below for service accounts allowed to use
 ###
 
 runAsUser:
@@ -63,7 +63,7 @@ rules:
 ### role binding for binding serviceaccount to constraint
 ###
 apiVersion: rbac.authorization.k8s.io/v1
-# This role binding grants "secretgen-controller-sa" membership to Role cluster-essentials-secretgen-controller-role
+# This role binding grants "contour" searvice account membership to ClusterRole application-platform-envoy-cluster-role
 kind: ClusterRoleBinding
 metadata:
   name: application-platform-general-cluster-role-binding
