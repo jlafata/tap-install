@@ -20,7 +20,6 @@ allowPrivilegeEscalation: false
 #  drop:
 #   - all
 
-
 ###
 ### required values in a security context controller
 ###
@@ -35,6 +34,24 @@ seLinuxContext:
   type: MustRunAs
 runAsUser:
   type: MustRunAsRange
+
+#from restricted
+allowedCapabilities: null
+priority: null
+requiredDropCapabilities:
+  - KILL
+  - MKNOD
+  - SETUID
+  - SETGID
+supplementalGroups:
+  type: RunAsAny
+volumes:
+  - configMap
+  - downwardAPI
+  - emptyDir
+  - persistentVolumeClaim
+  - projected
+  - secret
 
 ###
 ### make sure this is only used by the kapp-controller-sa in the tanzu-system-ingress namespace
@@ -80,3 +97,5 @@ subjects:
   - kind: ServiceAccount
     name: kapp-controller-sa
     namespace: kapp-controller
+
+
