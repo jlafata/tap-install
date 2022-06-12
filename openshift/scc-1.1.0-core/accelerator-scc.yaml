@@ -63,7 +63,7 @@ rules:
 ### role binding for binding serviceaccount to constraint
 ###
 apiVersion: rbac.authorization.k8s.io/v1
-# This role binding grants "accelerator" service accounts membership to Role accelerator-role
+# This role binding grants "accelerator" service accounts membership to Role accelerator-scc-role
 kind: RoleBinding
 metadata:
   name: accelerator-scc-role-binding
