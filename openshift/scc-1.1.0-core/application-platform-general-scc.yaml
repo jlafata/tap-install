@@ -1,6 +1,6 @@
 ---
 ###
-### this scc is used by
+### this scc is used by contour and the flux-source-controller
 ###
 ###
 ###
@@ -34,10 +34,11 @@ seLinuxContext:
   type: MustRunAs
 
 ###
-### make sure this is only used by the secretgen-controller-sa
+### make sure this is only used by the following service accounts
 ###
 users:
   - system:serviceaccount:tanzu-system-ingress:contour
+  - system:serviceaccount:flux-system:default
 ---
 ###
 ### role for binding serviceaccount to constraint
@@ -75,3 +76,6 @@ subjects:
   - kind: ServiceAccount
     namespace: tanzu-system-ingress
     name: contour
+  - kind: ServiceAccount
+    namespace: flux-system
+    name: default

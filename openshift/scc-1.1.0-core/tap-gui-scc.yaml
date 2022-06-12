@@ -1,14 +1,14 @@
 ---
 ###
-### security context constraints required to install the accelerator-controller-manager
+### security context constraints required to install the tap-gui
 ###
 kind: SecurityContextConstraints
 apiVersion: security.openshift.io/v1
 metadata:
-  name: accelerator-scc
+  name: tap-gui-scc
 
 ###
-### values needed for the security context of the accelerator-controller-manager-scc
+### values needed for the security context of the tap-gui-scc
 ###
 
 runAsUser:
@@ -31,10 +31,10 @@ seLinuxContext:
   type: MustRunAs
 
 ###
-### make sure this is only used by the accelerator-controller-manager service account
+### make sure this is only used by the default service account in the tap-gui namespace
 ###
 users:
-  - system:serviceaccount:accelerator-system:accelerator-controller-manager
+  - system:serviceaccount:tap-gui:default
 ---
 ###
 ### role for binding serviceaccount to constraint
@@ -45,13 +45,13 @@ users:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: accelerator-scc-role
-  namespace: accelerator-system
+  name: tap-gui-scc-role
+  namespace: tap-gui
 rules:
   - apiGroups:
       - security.openshift.io
     resourceNames:
-      - accelerator-scc
+      - tap-gui-scc
     resources:
       - securitycontextconstraints
     verbs:
@@ -64,19 +64,13 @@ apiVersion: rbac.authorization.k8s.io/v1
 # This role binding grants "accelerator" service accounts membership to Role accelerator-role
 kind: RoleBinding
 metadata:
-  name: accelerator-scc-role-binding
-  namespace: accelerator-system
+  name: tap-gui-scc-role-binding
+  namespace: tap-gui
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: accelerator-scc-role
+  name: tap-gui-scc-role
 subjects:
   - kind: ServiceAccount
-    namespace: accelerator-system
-    name: accelerator-controller-manager
-  - kind: ServiceAccount
-    namespace: accelerator-system
-    name: accelerator-server
-  - kind: ServiceAccount
-    namespace: accelerator-system
-    name: accelerator-engine
+    namespace: tap-gui
+    name: default
