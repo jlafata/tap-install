@@ -1,3 +1,6 @@
+kind: SecurityContextConstraints
+apiVersion: security.openshift.io/v1
+
 allowHostDirVolumePlugin: false
 allowHostIPC: false
 allowHostNetwork: false
@@ -6,13 +9,11 @@ allowHostPorts: false
 allowPrivilegeEscalation: true
 allowPrivilegedContainer: false
 allowedCapabilities: null
-apiVersion: security.openshift.io/v1
 defaultAddCapabilities: null
 fsGroup:
   type: RunAsAny
 groups:
 - system:authenticated
-kind: SecurityContextConstraints
 metadata:
   annotations:
   generation: 1

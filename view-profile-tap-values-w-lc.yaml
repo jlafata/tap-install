@@ -1,0 +1,62 @@
+#@ load("@ytt:data", "data")
+---
+profile: view
+ceip_policy_disclosed: true # Installation fails if this is set to 'false'
+
+learningcenter:
+  ingressDomain: #@ "learning-center.{}".format(data.values.ingress.domain)
+
+tap_gui:
+  ingressEnabled: true
+  ingressDomain: #@ data.values.ingress.domain
+  service_type: ClusterIP # NodePort for distributions that don't support LoadBalancer
+  app_config:
+    backend:
+      baseUrl: #@ "http://tap-gui.{}".format(data.values.ingress.domain)
+      cors:
+        origin: #@ "http://tap-gui.{}".format(data.values.ingress.domain)
+    app:
+      baseUrl: #@ "http://tap-gui.{}".format(data.values.ingress.domain)
+    integrations:
+      github:
+        - host: #@ data.values.gitrepo.host
+          token: #@ data.values.gitrepo.token
+    catalog:
+      locations:
+        - type: url
+          target: #@ data.values.catalog.location
+#    auth:
+#      environment: os-sandbox
+#      providers:
+#        github:
+#          os-sandbox:
+#            clientId: #@ data.values.tap.auth.client_id
+#            clientSecret: #@ data.values.tap.auth.client_secret
+
+#metadata_store:
+#  app_service_type: ClusterIP # (optional) Defaults to LoadBalancer. Change to NodePort for distributions that don't support LoadBalancer
+
+contour:
+  envoy:
+    service:
+      type: LoadBalancer
+
+accelerator:
+#  domain: #@ "{}".format(data.values.ingress.domain)
+#  ingress:
+#    include: true
+#  tls:
+#    secretName: #@ data.values.ingress.contour_tls_secret
+#    namespace: #@ data.values.ingress.contour_tls_namespace
+#  server:
+#    service_type: ClusterIP
+  samples:
+    include: true
+
+
+excluded_packages:
+  - workshops.learningcenter.tanzu.vmware.com
+  - ootb-supply-chain-basic.tanzu.vmware.com
+  - scanning.apps.tanzu.vmware.com
+  - grype.scanning.apps.tanzu.vmware.com
+  - metadata-store.apps.tanzu.vmware.com

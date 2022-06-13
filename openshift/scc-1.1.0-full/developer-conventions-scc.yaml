@@ -1,0 +1,77 @@
+---
+###
+### security context constraints required to install the developer-conventions
+###
+kind: SecurityContextConstraints
+apiVersion: security.openshift.io/v1
+metadata:
+  name: developer-conventions-scc
+
+###
+### values needed for the security context of the app-live-view-connector-scc
+###
+
+runAsUser:
+  type: MustRunAs
+  uid: 1000
+fsGroup:
+  type: RunAsAny
+
+###
+### required values in a security context 
+###
+allowHostDirVolumePlugin: false
+allowHostIPC: false
+allowHostNetwork: false
+allowHostPID: false
+allowHostPorts: false
+allowPrivilegedContainer: false
+readOnlyRootFilesystem: false
+seLinuxContext:
+  type: MustRunAs
+
+###
+### make sure this is only used by the default service account in the developer-conventions namespace
+###
+users:
+  - system:serviceaccount:developer-conventions:default
+---
+###
+### role for binding serviceaccount to constraint
+###
+### reference for binding serviceaccount to constraint
+### https://docs.openshift.com/container-platform/4.6/authentication/managing-security-context-constraints.html#role-based-access-to-ssc_configuring-internal-oauth
+###
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: developer-conventions-scc-role
+  namespace: developer-conventions
+rules:
+  - apiGroups:
+      - security.openshift.io
+    resourceNames:
+      - developer-conventions-scc
+    resources:
+      - securitycontextconstraints
+    verbs:
+      - use
+---
+###
+### role binding for binding serviceaccount to constraint
+###
+apiVersion: rbac.authorization.k8s.io/v1
+# This role binding grants the "app-live-view-connector-service-account" service account in the app-live-view-connector namespace membership to Role app-live-view-connector-scc-role
+# This role binding also grants the "default" service account in the app-live-view-conventions namespace membership to Role app-live-view-connector-scc-role
+kind: RoleBinding
+metadata:
+  name: developer-conventions-scc-role-binding
+  namespace: developer-conventions
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: developer-conventions-scc-role
+subjects:
+  - kind: ServiceAccount
+    namespace: developer-conventions
+    name: default

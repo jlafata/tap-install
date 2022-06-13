@@ -1,13 +1,13 @@
 ---
 ###
-### this scc is used by contour and the flux-source-controller
+### this scc is used by the metadata-store 
 ###
 ###
 
 kind: SecurityContextConstraints
 apiVersion: security.openshift.io/v1
 metadata:
-  name: application-platform-general-scc
+  name: application-platform-metadata-store-ss-scc
 
 ###
 ### values needed for the security context for a number application platform components
@@ -15,9 +15,10 @@ metadata:
 ###
 
 runAsUser:
-  type: MustRunAsRange
-  uidRangeMin: 65532
-  uidRangeMax: 65534
+  type: MustRunAs
+  uid: 65532
+fsGroup:
+  type: RunAsAny
 
 ###
 ### required values in a security context controller
@@ -36,8 +37,7 @@ seLinuxContext:
 ### make sure this is only used by the following service accounts
 ###
 users:
-  - system:serviceaccount:tanzu-system-ingress:contour
-  - system:serviceaccount:flux-system:default
+  - system:serviceaccount:metadata-store:metadata-store-read-write-client
 ---
 ###
 ### role for binding serviceaccount to constraint
@@ -48,12 +48,12 @@ users:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: application-platform-general-cluster-role
+  name: metadata-store-ss-cluster-role
 rules:
   - apiGroups:
       - security.openshift.io
     resourceNames:
-      - application-platform-general-scc
+      - application-platform-metadata-store-ss-scc
     resources:
       - securitycontextconstraints
     verbs:
@@ -63,19 +63,15 @@ rules:
 ### role binding for binding serviceaccount to constraint
 ###
 apiVersion: rbac.authorization.k8s.io/v1
-# This role binding grants "contour" service account in the tanzu-system-ingress namespace membership to ClusterRole application-platform-envoy-cluster-role
-# This role binding grants "default" service account in the flux-system namespace membership to ClusterRole application-platform-envoy-cluster-role
+# This role binding grants "metadata-store-read-write-client" service account in the metadata-store namespace membership to ClusterRole metadata-store-ss-cluster-role
 kind: ClusterRoleBinding
 metadata:
-  name: application-platform-general-cluster-role-binding
+  name: metadata-store-cluster-ss-role-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: application-platform-general-cluster-role
+  name: metadata-store-ss-cluster-role
 subjects:
   - kind: ServiceAccount
-    namespace: tanzu-system-ingress
-    name: contour
-  - kind: ServiceAccount
-    namespace: flux-system
-    name: default
+    namespace: metadata-store
+    name: metadata-store-read-write-client

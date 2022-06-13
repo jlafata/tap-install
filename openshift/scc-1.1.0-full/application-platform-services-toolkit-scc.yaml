@@ -1,13 +1,13 @@
 ---
 ###
-### this scc is used by contour and the flux-source-controller
+### this scc is used by the services toolkit
 ###
 ###
 
 kind: SecurityContextConstraints
 apiVersion: security.openshift.io/v1
 metadata:
-  name: application-platform-general-scc
+  name: application-platform-services-toolkit-scc
 
 ###
 ### values needed for the security context for a number application platform components
@@ -15,9 +15,10 @@ metadata:
 ###
 
 runAsUser:
-  type: MustRunAsRange
-  uidRangeMin: 65532
-  uidRangeMax: 65534
+  type: MustRunAs
+  uid: 65532
+seccompProfiles:
+  - '*'
 
 ###
 ### required values in a security context controller
@@ -36,8 +37,7 @@ seLinuxContext:
 ### make sure this is only used by the following service accounts
 ###
 users:
-  - system:serviceaccount:tanzu-system-ingress:contour
-  - system:serviceaccount:flux-system:default
+  - system:serviceaccount:services-toolkit:services-toolkit-controller-manager
 ---
 ###
 ### role for binding serviceaccount to constraint
@@ -48,12 +48,12 @@ users:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: application-platform-general-cluster-role
+  name: services-toolkit-cluster-role
 rules:
   - apiGroups:
       - security.openshift.io
     resourceNames:
-      - application-platform-general-scc
+      - application-platform-services-toolkit-scc
     resources:
       - securitycontextconstraints
     verbs:
@@ -63,19 +63,15 @@ rules:
 ### role binding for binding serviceaccount to constraint
 ###
 apiVersion: rbac.authorization.k8s.io/v1
-# This role binding grants "contour" service account in the tanzu-system-ingress namespace membership to ClusterRole application-platform-envoy-cluster-role
-# This role binding grants "default" service account in the flux-system namespace membership to ClusterRole application-platform-envoy-cluster-role
+# This role binding grants "services-toolkit-controller-manager" service account in the services-toolkit namespace membership to ClusterRole application-platform-envoy-cluster-role-2
 kind: ClusterRoleBinding
 metadata:
-  name: application-platform-general-cluster-role-binding
+  name: services-toolkit-cluster-role-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: application-platform-general-cluster-role
+  name: services-toolkit-cluster-role
 subjects:
   - kind: ServiceAccount
-    namespace: tanzu-system-ingress
-    name: contour
-  - kind: ServiceAccount
-    namespace: flux-system
-    name: default
+    namespace: services-toolkit
+    name: services-toolkit-controller-manager

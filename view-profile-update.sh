@@ -17,7 +17,8 @@ export INSTALL_REGISTRY_HOSTNAME=registry.tanzu.vmware.com
 export INSTALL_REGISTRY_USERNAME=$(yq '.tanzunet.username' < "${values_file}")
 export INSTALL_REGISTRY_PASSWORD=$(yq '.tanzunet.password' < "${values_file}")
 
-ytt -f "${script_dir}/view-profile-tap-values.yaml" -f "${values_file}" --ignore-unknown-comments > "${generated_dir}/tap-values.yaml"
+#ytt -f "${script_dir}/view-profile-tap-values.yaml" -f "${values_file}" --ignore-unknown-comments > "${generated_dir}/tap-values.yaml"
+ytt -f "${script_dir}/view-profile-tap-values-w-lc.yaml" -f "${values_file}" --ignore-unknown-comments > "${generated_dir}/tap-values.yaml"
 
 tanzu package installed update tap \
   --namespace tap-install \

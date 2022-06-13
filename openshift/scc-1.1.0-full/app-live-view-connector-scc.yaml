@@ -1,0 +1,81 @@
+---
+###
+### security context constraints required to install the app-live-view-connector and app-live-view-conventions
+###
+kind: SecurityContextConstraints
+apiVersion: security.openshift.io/v1
+metadata:
+  name: app-live-view-connector-scc
+
+###
+### values needed for the security context of the app-live-view-connector-scc
+###
+
+runAsUser:
+  type: MustRunAs
+  uid: 1000
+fsGroup:
+  type: RunAsAny
+
+###
+### required values in a security context 
+###
+allowHostDirVolumePlugin: false
+allowHostIPC: false
+allowHostNetwork: false
+allowHostPID: false
+allowHostPorts: false
+allowPrivilegedContainer: false
+readOnlyRootFilesystem: false
+seLinuxContext:
+  type: MustRunAs
+
+###
+### make sure this is only used by the default service account in the app-live-view-connector namespace
+###
+users:
+  - system:serviceaccount:app-live-view-connector:app-live-view-connector-service-account
+  - system:serviceaccount:app-live-view-conventions:default
+---
+###
+### role for binding serviceaccount to constraint
+###
+### reference for binding serviceaccount to constraint
+### https://docs.openshift.com/container-platform/4.6/authentication/managing-security-context-constraints.html#role-based-access-to-ssc_configuring-internal-oauth
+###
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: app-live-view-connector-scc-role
+  namespace: app-live-view-connector
+rules:
+  - apiGroups:
+      - security.openshift.io
+    resourceNames:
+      - app-live-view-connector-scc
+    resources:
+      - securitycontextconstraints
+    verbs:
+      - use
+---
+###
+### role binding for binding serviceaccount to constraint
+###
+apiVersion: rbac.authorization.k8s.io/v1
+# This role binding grants the "app-live-view-connector-service-account" service account in the app-live-view-connector namespace membership to Role app-live-view-connector-scc-role
+# This role binding also grants the "default" service account in the app-live-view-conventions namespace membership to Role app-live-view-connector-scc-role
+kind: RoleBinding
+metadata:
+  name: app-live-view-connector-scc-role-binding
+  namespace: app-live-view-connector
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: app-live-view-connector-scc-role
+subjects:
+  - kind: ServiceAccount
+    namespace: app-live-view-connector
+    name: app-live-view-connector-service-account
+  - kind: ServiceAccount
+    namespace: app-live-view-conventions
+    name: default
