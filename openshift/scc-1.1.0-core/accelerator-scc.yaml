@@ -45,10 +45,9 @@ users:
 ### https://docs.openshift.com/container-platform/4.6/authentication/managing-security-context-constraints.html#role-based-access-to-ssc_configuring-internal-oauth
 ###
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
-  name: accelerator-scc-role
-  namespace: accelerator-system
+  name: accelerator-scc-cluster-role
 rules:
   - apiGroups:
       - security.openshift.io
@@ -66,12 +65,11 @@ apiVersion: rbac.authorization.k8s.io/v1
 # This role binding grants "accelerator" service accounts membership to Role accelerator-scc-role
 kind: RoleBinding
 metadata:
-  name: accelerator-scc-role-binding
-  namespace: accelerator-system
+  name: accelerator-scc-cluster-role-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: accelerator-scc-role
+  name: accelerator-scc-cluster-role
 subjects:
   - kind: ServiceAccount
     namespace: accelerator-system
