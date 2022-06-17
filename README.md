@@ -106,11 +106,6 @@ rm -rf ~/Library/Application\ Support/tanzu-cli/*
 rm -rf ~/.local/share/tanzu-cli/*
 ```
 
-#### on openshift, this is required until PR to add finalizers to RBAC merged into branch
-```
-kubectl apply -f openshift/kapp-controller-cluster-role-2.yaml
-```
-
 ## Option 1 - Install TAP View profile only, the view profile currently assumes http protocol to the TAP-gui, it's the simplest install
 ```
 ./view-profile-install.sh
