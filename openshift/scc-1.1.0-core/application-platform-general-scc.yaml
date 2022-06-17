@@ -38,44 +38,45 @@ seLinuxContext:
 users:
   - system:serviceaccount:tanzu-system-ingress:contour
   - system:serviceaccount:flux-system:default
----
-###
-### role for binding serviceaccount to constraint
-###
-### reference for binding serviceaccount to constraint
-### https://docs.openshift.com/container-platform/4.6/authentication/managing-security-context-constraints.html#role-based-access-to-ssc_configuring-internal-oauth
-###
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: application-platform-general-cluster-role
-rules:
-  - apiGroups:
-      - security.openshift.io
-    resourceNames:
-      - application-platform-general-scc
-    resources:
-      - securitycontextconstraints
-    verbs:
-      - use
----
-###
-### role binding for binding serviceaccount to constraint
-###
-apiVersion: rbac.authorization.k8s.io/v1
-# This role binding grants "contour" service account in the tanzu-system-ingress namespace membership to ClusterRole application-platform-envoy-cluster-role
-# This role binding grants "default" service account in the flux-system namespace membership to ClusterRole application-platform-envoy-cluster-role
-kind: ClusterRoleBinding
-metadata:
-  name: application-platform-general-cluster-role-binding
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: application-platform-general-cluster-role
-subjects:
-  - kind: ServiceAccount
-    namespace: tanzu-system-ingress
-    name: contour
-  - kind: ServiceAccount
-    namespace: flux-system
-    name: default
+
+#---
+####
+#### cluster role for binding serviceaccount to constraint
+####
+#### reference for binding serviceaccount to constraint
+#### https://docs.openshift.com/container-platform/4.6/authentication/managing-security-context-constraints.html#role-based-access-to-ssc_configuring-internal-oauth
+####
+#apiVersion: rbac.authorization.k8s.io/v1
+#kind: ClusterRole
+#metadata:
+#  name: application-platform-general-cluster-role
+#rules:
+#  - apiGroups:
+#      - security.openshift.io
+#    resourceNames:
+#      - application-platform-general-scc
+#    resources:
+#      - securitycontextconstraints
+#    verbs:
+#      - use
+#---
+####
+#### role binding for binding serviceaccount to constraint
+####
+#apiVersion: rbac.authorization.k8s.io/v1
+## This cluster role binding grants "contour" service account in the tanzu-system-ingress namespace membership to ClusterRole application-platform-envoy-cluster-role
+## This cluster role binding grants "default" service account in the flux-system namespace membership to ClusterRole application-platform-envoy-cluster-role
+#kind: ClusterRoleBinding
+#metadata:
+#  name: application-platform-general-cluster-role-binding
+#roleRef:
+#  apiGroup: rbac.authorization.k8s.io
+#  kind: ClusterRole
+#  name: application-platform-general-cluster-role
+#subjects:
+#  - kind: ServiceAccount
+#    namespace: tanzu-system-ingress
+#    name: contour
+#  - kind: ServiceAccount
+#    namespace: flux-system
+#    name: default

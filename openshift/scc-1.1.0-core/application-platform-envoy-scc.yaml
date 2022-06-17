@@ -2,6 +2,9 @@
 ###
 ###  required for the daemonset envoy in the tanzu-system-ingress namespace
 ###
+### used only by service account associated with the daemonset envoy in the tanzu-system-ingress namespace
+### - system:serviceaccount:tanzu-system-ingress:envoy
+###
 ### this is based on the restrictive scc, but removes allowPrivilegeEscalation as this is not required
 ###
 
@@ -30,11 +33,7 @@ seLinuxContext:
 runAsUser:
   type: MustRunAsRange
 
-###
-### make sure this is only used by the service account associated with the envoy daemon
-###
-users:
-  - system:serviceaccount:tanzu-system-ingress:envoy
+
 ---
 ###
 ### role for binding serviceaccount to constraint
@@ -43,7 +42,7 @@ users:
 ### https://docs.openshift.com/container-platform/4.6/authentication/managing-security-context-constraints.html#role-based-access-to-ssc_configuring-internal-oauth
 ###
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
   name: application-platform-envoy-cluster-role
 rules:
@@ -61,7 +60,7 @@ rules:
 ###
 apiVersion: rbac.authorization.k8s.io/v1
 # This role binding grants "envoy" service account membership to Role application-platform-envoy-cluster-role
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
   name: application-platform-envoy-cluster-role-binding
 roleRef:

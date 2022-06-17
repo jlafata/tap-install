@@ -1,24 +1,20 @@
 ---
 ###
 ### security context constraints required to install the carvel kapp-controller
-### * required until version v0.9.1 of carvel kapp controller is released
+### * partly required until version v0.9.1 of carvel kapp controller is released
+### * also required until the pull request include finalizers in the apiGroup Resource rules is released
 ###
-### this is based on the restrictive scc, but removes allowPrivilegeEscalation as this is not required?
+### this is based on the restrictive scc, but removes allowPrivilegeEscalation as this is not required for the kapp controller
 ###
-
 kind: SecurityContextConstraints
 apiVersion: security.openshift.io/v1
 metadata:
-  name: cluster-essentials-kapp-controller
+  name: cluster-essentials-kapp-controller-scc
 
 ###
 ### values needed for the security context of the kapp-controller
 ###
-
 allowPrivilegeEscalation: false
-#capabilities:
-#  drop:
-#   - all
 
 ###
 ### required values in a security context controller
@@ -35,7 +31,7 @@ seLinuxContext:
 runAsUser:
   type: MustRunAsRange
 
-#from restricted
+#from restricted scc
 allowedCapabilities: null
 priority: null
 requiredDropCapabilities:
@@ -58,6 +54,7 @@ volumes:
 ###
 users:
   - system:serviceaccount:kapp-controller:kapp-controller-sa
+
 ---
 ###
 ### role for binding serviceaccount to constraint
@@ -66,33 +63,42 @@ users:
 ### https://docs.openshift.com/container-platform/4.6/authentication/managing-security-context-constraints.html#role-based-access-to-ssc_configuring-internal-oauth
 ###
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
-  name: cluster-essentials-kapp-controller-role
-  namespace: kapp-controller
+  name: cluster-essentials-kapp-controller-scc-cluster-role
+#  namespace: kapp-controller
 rules:
   - apiGroups:
       - security.openshift.io
     resourceNames:
-      - cluster-essentials-kapp-controller
+      - cluster-essentials-kapp-controller-scc
     resources:
       - securitycontextconstraints
     verbs:
       - use
+### necessary until pull request to include finalizers in the apiGroup Resource rules is released
+  - apiGroups:
+      - packaging.carvel.dev
+    resources:
+      - packageinstalls
+      - packageinstalls/status
+      - packageinstalls/finalizers
+    verbs:
+      - '*'
 ---
 ###
 ### role binding for binding serviceaccount to constraint
 ###
 apiVersion: rbac.authorization.k8s.io/v1
 # This role binding grants "kapp-controller-sa" membership to Role cluster-essentials-kapp-controller-role
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
-  name: cluster-essentials-kapp-controller-role-binding
-  namespace: kapp-controller
+  name: cluster-essentials-kapp-controller-scc-cluster-role-binding
+#  namespace: kapp-controller
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: cluster-essentials-kapp-controller-role
+  kind: ClusterRole
+  name: cluster-essentials-kapp-controller-scc-cluster-role
 subjects:
   - kind: ServiceAccount
     name: kapp-controller-sa

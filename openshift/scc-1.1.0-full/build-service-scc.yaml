@@ -3,6 +3,19 @@
 ### security context constraints required to install the build-service-warmer, dependency-updater-controller, secret-syncer-controller and the daemonset/build-pod-image-fetcher
 ### also used by controller and webhook deployments in the kpack namespace and by the controller-manager in the stacks-operator-system namespace
 ###
+###  this scc is only to be used by the build-service-warmer service account in the build-service namespace
+###
+###   - system:serviceaccount:build-service:warmer-service-account
+###  - system:serviceaccount:build-service:dependency-updater-controller-serviceaccount
+###  - system:serviceaccount:build-service:secret-syncer-service-account
+# used by daemonset/build-pod-image-fetcher
+###  - system:serviceaccount:build-service:default
+# used in kpack namespace
+###  - system:serviceaccount:kpack:controller
+###  - system:serviceaccount:kpack:webhook
+# used by stacks-operator-system namespace
+###  - system:serviceaccount:stacks-operator-system:controller-manager
+###
 kind: SecurityContextConstraints
 apiVersion: security.openshift.io/v1
 metadata:
@@ -29,20 +42,6 @@ seLinuxContext:
 runAsUser:
   type: MustRunAsRange
 
-###
-### make sure this is only used by the build-service-warmer service account in the build-service namespace
-###
-users:
-  - system:serviceaccount:build-service:warmer-service-account
-  - system:serviceaccount:build-service:dependency-updater-controller-serviceaccount
-  - system:serviceaccount:build-service:secret-syncer-service-account
-  # used by daemonset/build-pod-image-fetcher
-  - system:serviceaccount:build-service:default
-  # used in kpack namespace
-  - system:serviceaccount:kpack:controller
-  - system:serviceaccount:kpack:webhook
-  # used by stacks-operator-system namespace
-  - system:serviceaccount:stacks-operator-system:controller-manager
 ---
 ###
 ### role for binding serviceaccount to constraint
@@ -51,10 +50,9 @@ users:
 ### https://docs.openshift.com/container-platform/4.6/authentication/managing-security-context-constraints.html#role-based-access-to-ssc_configuring-internal-oauth
 ###
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
   name: build-service-scc-role
-  namespace: build-service
 rules:
   - apiGroups:
       - security.openshift.io
@@ -70,18 +68,17 @@ rules:
 ###
 apiVersion: rbac.authorization.k8s.io/v1
 # This role binding grants the "build-service-warmer" service account in the build-service namespace membership to Role build-service-scc-role
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
   name: build-service-scc-role-binding
-  namespace: build-service
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
+  kind: ClusterRole
   name: build-service-scc-role
 subjects:
   - kind: ServiceAccount
     namespace: build-service
-    name: build-service-warmer
+    name: warmer-service-account
   - kind: ServiceAccount
     namespace: build-service
     name: dependency-updater-controller-serviceaccount

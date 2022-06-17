@@ -55,7 +55,6 @@ accelerator:
 
 
 excluded_packages:
-  - workshops.learningcenter.tanzu.vmware.com
   - ootb-supply-chain-basic.tanzu.vmware.com
   - scanning.apps.tanzu.vmware.com
   - grype.scanning.apps.tanzu.vmware.com

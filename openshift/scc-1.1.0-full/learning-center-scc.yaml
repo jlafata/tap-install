@@ -1,7 +1,9 @@
 ---
 ###
 ### security context constraints required to install the learningcenter
-###
+#### this scc can only used by the default service account in the learningcenter namespace
+####  - system:serviceaccount:learningcenter:default
+####
 kind: SecurityContextConstraints
 apiVersion: security.openshift.io/v1
 metadata:
@@ -10,7 +12,6 @@ metadata:
 ###
 ### values needed for the security context of the learningcenter-scc
 ###
-
 runAsUser:
   type: MustRunAs
   uid: 1
@@ -30,11 +31,6 @@ readOnlyRootFilesystem: false
 seLinuxContext:
   type: MustRunAs
 
-###
-### make sure this is only used by the default service account in the learningcenter namespace
-###
-users:
-  - system:serviceaccount:learningcenter:default
 ---
 ###
 ### role for binding serviceaccount to constraint
@@ -64,7 +60,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: learningcenter-scc-cluster-role-binding
-  namespace: learningcenter
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

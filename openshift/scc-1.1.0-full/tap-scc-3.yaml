@@ -1,16 +1,18 @@
 ---
 ###
-### security context constraints required to install the accelerator
+### security context constraints required to install the app-live-view-connector and app-live-view-conventions
+#### this SCC is only to be used by the following service accounts
+####  - system:serviceaccount:app-live-view-connector:app-live-view-connector-service-account
+####  - system:serviceaccount:app-live-view-conventions:default
 ###
 kind: SecurityContextConstraints
 apiVersion: security.openshift.io/v1
 metadata:
-  name: accelerator-scc
+  name: tap-scc-3
 
 ###
-### values needed for the security context of the accelerator-scc
+### values needed for the security context of the app-live-view-connector-scc
 ###
-
 runAsUser:
   type: MustRunAs
   uid: 1000
@@ -30,13 +32,6 @@ readOnlyRootFilesystem: false
 seLinuxContext:
   type: MustRunAs
 
-###
-### make sure this is only used by the accelerator service accounts in the accelerator-system namespace
-###
-users:
-  - system:serviceaccount:accelerator-system:accelerator-controller-manager
-  - system:serviceaccount:accelerator-system:accelerator-server
-  - system:serviceaccount:accelerator-system:accelerator-engine
 ---
 ###
 ### role for binding serviceaccount to constraint
@@ -47,12 +42,12 @@ users:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: accelerator-scc-cluster-role
+  name: tap-scc-cluster-role-3
 rules:
   - apiGroups:
       - security.openshift.io
     resourceNames:
-      - accelerator-scc
+      - tap-scc-3
     resources:
       - securitycontextconstraints
     verbs:
@@ -62,21 +57,19 @@ rules:
 ### role binding for binding serviceaccount to constraint
 ###
 apiVersion: rbac.authorization.k8s.io/v1
-# This role binding grants "accelerator" service accounts membership to Role accelerator-scc-role
-kind: RoleBinding
+# This role binding grants the "app-live-view-connector-service-account" service account in the app-live-view-connector namespace membership to Role app-live-view-connector-scc-role
+# This role binding also grants the "default" service account in the app-live-view-conventions namespace membership to Role app-live-view-connector-scc-role
+kind: ClusterRoleBinding
 metadata:
-  name: accelerator-scc-cluster-role-binding
+  name: tap-scc-cluster-role-binding-3
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: accelerator-scc-cluster-role
+  kind: ClusterRole
+  name: tap-scc-cluster-role-3
 subjects:
   - kind: ServiceAccount
-    namespace: accelerator-system
-    name: accelerator-controller-manager
+    namespace: app-live-view-connector
+    name: app-live-view-connector-service-account
   - kind: ServiceAccount
-    namespace: accelerator-system
-    name: accelerator-server
-  - kind: ServiceAccount
-    namespace: accelerator-system
-    name: accelerator-engine
+    namespace: app-live-view-conventions
+    name: default

@@ -1,24 +1,27 @@
 ---
 ###
-### security context constraints required to install the tap-gui
+### this scc is used by the services toolkit
+###
+### this scc is only to used by the following service accounts
+###  - system:serviceaccount:services-toolkit:services-toolkit-controller-manager
 ###
 kind: SecurityContextConstraints
 apiVersion: security.openshift.io/v1
 metadata:
-  name: tap-gui-scc
+  name: services-toolkit-scc
 
 ###
-### values needed for the security context of the tap-gui-scc
+### values needed for the security context for a number application platform components
+### see users and role bindings below for service accounts allowed to use
 ###
-
 runAsUser:
   type: MustRunAs
-  uid: 1000
-fsGroup:
-  type: RunAsAny
+  uid: 65532
+seccompProfiles:
+  - '*'
 
 ###
-### required values in a security context 
+### required values in a security context controller
 ###
 allowHostDirVolumePlugin: false
 allowHostIPC: false
@@ -30,11 +33,6 @@ readOnlyRootFilesystem: false
 seLinuxContext:
   type: MustRunAs
 
-###
-### make sure this is only used by the default service account in the tap-gui namespace
-###
-users:
-  - system:serviceaccount:tap-gui:default
 ---
 ###
 ### role for binding serviceaccount to constraint
@@ -45,12 +43,12 @@ users:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: tap-gui-scc-cluster-role
+  name: services-toolkit-cluster-role
 rules:
   - apiGroups:
       - security.openshift.io
     resourceNames:
-      - tap-gui-scc
+      - services-toolkit-scc
     resources:
       - securitycontextconstraints
     verbs:
@@ -60,15 +58,15 @@ rules:
 ### role binding for binding serviceaccount to constraint
 ###
 apiVersion: rbac.authorization.k8s.io/v1
-# This role binding grants the "default" service accounts in the tap-gui namespace membership to Role tap-gui-scc-role
+# This role binding grants "services-toolkit-controller-manager" service account in the services-toolkit namespace membership to ClusterRole application-platform-envoy-cluster-role-2
 kind: ClusterRoleBinding
 metadata:
-  name: tap-gui-scc-cluster-role-binding
+  name: services-toolkit-cluster-role-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: tap-gui-scc-cluster-role
+  name: services-toolkit-cluster-role
 subjects:
   - kind: ServiceAccount
-    namespace: tap-gui
-    name: default
+    namespace: services-toolkit
+    name: services-toolkit-controller-manager

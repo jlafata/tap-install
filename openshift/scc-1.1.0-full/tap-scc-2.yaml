@@ -1,23 +1,38 @@
 ---
 ###
-### this scc is used by the tekton-pipelines 
+### this scc is used by the metadata-store 
+###  - system:serviceaccount:metadata-store:metadata-store-app-auth
+###  - system:serviceaccount:metadata-store:metadata-store-read-write-client
+###  - system:serviceaccount:metadata-store:default
+###  - system:serviceaccount:tekton-pipelines:tekton-pipelines-controller
+###  - system:serviceaccount:tekton-pipelines:tekton-pipelines-webhook
 ###
-###
-
 kind: SecurityContextConstraints
 apiVersion: security.openshift.io/v1
 metadata:
-  name: application-platform-tekton-pipelines-scc
+  name: tap-scc-2
 
 ###
 ### values needed for the security context for a number application platform components
 ### see users and role bindings below for service accounts allowed to use
 ###
-
 runAsUser:
   type: MustRunAs
   uid: 65532
-
+fsGroup:
+  type: RunAsAny
+volumes:
+#required for tekton-pipelines-controller
+  - configMap
+#  - downwardAPI
+#required for metadata-store
+  - emptyDir
+#required for metadata-store
+  - persistentVolumeClaim
+#required for tekton-pipelines webhook and controller
+  - projected
+#required for metadata-store
+  - secret
 
 ###
 ### required values in a security context controller
@@ -31,13 +46,6 @@ allowPrivilegedContainer: false
 readOnlyRootFilesystem: false
 seLinuxContext:
   type: MustRunAs
-
-###
-### make sure this is only used by the following service accounts
-###
-users:
-  - system:serviceaccount:tekton-pipelines:tekton-pipelines-controller
-  - system:serviceaccount:tekton-pipelines:tekton-pipelines-webhook
 ---
 ###
 ### role for binding serviceaccount to constraint
@@ -48,12 +56,12 @@ users:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: tekton-pipelines-cluster-role
+  name: tap-scc-cluster-role-2
 rules:
   - apiGroups:
       - security.openshift.io
     resourceNames:
-      - application-platform-tekton-pipelines-scc
+      - tap-scc-2
     resources:
       - securitycontextconstraints
     verbs:
@@ -63,19 +71,27 @@ rules:
 ### role binding for binding serviceaccount to constraint
 ###
 apiVersion: rbac.authorization.k8s.io/v1
-# This role binding grants "tekton-pipelines-controller" service account in the tekton-pipelines namespace membership to ClusterRole tekton-pipelines-cluster-role
+# This role binding grants "metadata-store-app-auth" service account in the metadata-store namespace membership to ClusterRole metadata-store-cluster-role
 kind: ClusterRoleBinding
 metadata:
-  name: tekton-pipelines-cluster-role-binding
+  name: tap-scc-cluster-role-binding-2
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: tekton-pipelines-cluster-role
+  name: tap-scc-cluster-role-2
 subjects:
+  - kind: ServiceAccount
+    namespace: metadata-store
+    name: metadata-store-app-auth
+  - kind: ServiceAccount
+    namespace: metadata-store
+    name: metadata-store-read-write-client
+  - kind: ServiceAccount
+    namespace: metadata-store
+    name: default
   - kind: ServiceAccount
     namespace: tekton-pipelines
     name: tekton-pipelines-controller
   - kind: ServiceAccount
     namespace: tekton-pipelines
     name: tekton-pipelines-webhook
-

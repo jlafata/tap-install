@@ -1,6 +1,8 @@
 ---
 ###
 ### security context constraints required to install the developer-conventions
+### make sure this is only used by the default service account in the developer-conventions namespace
+###  - system:serviceaccount:developer-conventions:default
 ###
 kind: SecurityContextConstraints
 apiVersion: security.openshift.io/v1
@@ -30,23 +32,17 @@ readOnlyRootFilesystem: false
 seLinuxContext:
   type: MustRunAs
 
-###
-### make sure this is only used by the default service account in the developer-conventions namespace
-###
-users:
-  - system:serviceaccount:developer-conventions:default
 ---
 ###
-### role for binding serviceaccount to constraint
+### cluster role for binding serviceaccount to constraint
 ###
 ### reference for binding serviceaccount to constraint
 ### https://docs.openshift.com/container-platform/4.6/authentication/managing-security-context-constraints.html#role-based-access-to-ssc_configuring-internal-oauth
 ###
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
-  name: developer-conventions-scc-role
-  namespace: developer-conventions
+  name: developer-conventions-scc-cluster-role
 rules:
   - apiGroups:
       - security.openshift.io
@@ -63,14 +59,13 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 # This role binding grants the "app-live-view-connector-service-account" service account in the app-live-view-connector namespace membership to Role app-live-view-connector-scc-role
 # This role binding also grants the "default" service account in the app-live-view-conventions namespace membership to Role app-live-view-connector-scc-role
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
-  name: developer-conventions-scc-role-binding
-  namespace: developer-conventions
+  name: developer-conventions-scc-cluster-role-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: developer-conventions-scc-role
+  kind: ClusterRole
+  name: developer-conventions-scc-cluster-role
 subjects:
   - kind: ServiceAccount
     namespace: developer-conventions
