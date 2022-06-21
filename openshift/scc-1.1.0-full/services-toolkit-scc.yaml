@@ -1,0 +1,72 @@
+---
+###
+### this scc is used by the services toolkit
+###
+### this scc is only to used by the following service accounts
+###  - system:serviceaccount:services-toolkit:services-toolkit-controller-manager
+###
+kind: SecurityContextConstraints
+apiVersion: security.openshift.io/v1
+metadata:
+  name: services-toolkit-scc
+
+###
+### values needed for the security context for a number application platform components
+### see users and role bindings below for service accounts allowed to use
+###
+runAsUser:
+  type: MustRunAs
+  uid: 65532
+seccompProfiles:
+  - '*'
+
+###
+### required values in a security context controller
+###
+allowHostDirVolumePlugin: false
+allowHostIPC: false
+allowHostNetwork: false
+allowHostPID: false
+allowHostPorts: false
+allowPrivilegedContainer: false
+readOnlyRootFilesystem: false
+seLinuxContext:
+  type: MustRunAs
+
+---
+###
+### role for binding serviceaccount to constraint
+###
+### reference for binding serviceaccount to constraint
+### https://docs.openshift.com/container-platform/4.6/authentication/managing-security-context-constraints.html#role-based-access-to-ssc_configuring-internal-oauth
+###
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: services-toolkit-cluster-role
+rules:
+  - apiGroups:
+      - security.openshift.io
+    resourceNames:
+      - services-toolkit-scc
+    resources:
+      - securitycontextconstraints
+    verbs:
+      - use
+---
+###
+### role binding for binding serviceaccount to constraint
+###
+apiVersion: rbac.authorization.k8s.io/v1
+# This role binding grants "services-toolkit-controller-manager" service account in the services-toolkit namespace membership to ClusterRole application-platform-envoy-cluster-role-2
+kind: ClusterRoleBinding
+metadata:
+  name: services-toolkit-cluster-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: services-toolkit-cluster-role
+subjects:
+  - kind: ServiceAccount
+    namespace: services-toolkit
+    name: services-toolkit-controller-manager
